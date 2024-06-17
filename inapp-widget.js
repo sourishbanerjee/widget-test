@@ -1,57 +1,57 @@
-function debounce(func, delay) {
-  let debounceTimer;
-  return function () {
-    const context = this;
-    const args = arguments;
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => func.apply(context, args), delay);
-  };
-}
-
-function removeHtmlAndLimitSentences(str) {
-  const noHtml = str.replace(/<[^>]*>/g, "");
-
-  if (/[.!?]/.test(noHtml)) {
-    const sentences = noHtml.match(/[^.!?]+[.!?]+/g) || [];
-    return sentences.slice(0, 2).join(" ");
-  } else {
-    return noHtml;
+(function () {
+  function debounce(func, delay) {
+    let debounceTimer;
+    return function () {
+      const context = this;
+      const args = arguments;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    };
   }
-}
 
-function BooleanWatcher(initialValue, onChange) {
-  let _value = initialValue;
+  function removeHtmlAndLimitSentences(str) {
+    const noHtml = str.replace(/<[^>]*>/g, "");
 
-  this.getValue = function () {
-    return _value;
-  };
+    if (/[.!?]/.test(noHtml)) {
+      const sentences = noHtml.match(/[^.!?]+[.!?]+/g) || [];
+      return sentences.slice(0, 2).join(" ");
+    } else {
+      return noHtml;
+    }
+  }
 
-  this.setValue = function (newValue) {
-    if (newValue !== _value) {
+  function BooleanWatcher(initialValue, onChange) {
+    let _value = initialValue;
+
+    this.getValue = function () {
+      return _value;
+    };
+
+    this.setValue = function (newValue) {
+      if (newValue !== _value) {
+        _value = newValue;
+        onChange(newValue);
+      }
+    };
+  }
+
+  function NumberWatcher(initialValue, onChange) {
+    let _value = initialValue;
+
+    this.getValue = function () {
+      return _value;
+    };
+
+    this.setValue = function (newValue) {
       _value = newValue;
       onChange(newValue);
-    }
-  };
-}
+    };
+  }
 
-function NumberWatcher(initialValue, onChange) {
-  let _value = initialValue;
-
-  this.getValue = function () {
-    return _value;
+  const urlFormater = (text) => {
+    return text?.toLowerCase()?.trimEnd()?.trimEnd()?.split(" ")?.join("-");
   };
 
-  this.setValue = function (newValue) {
-    _value = newValue;
-    onChange(newValue);
-  };
-}
-
-const urlFormater = (text) => {
-  return text?.toLowerCase()?.trimEnd()?.trimEnd()?.split(" ")?.join("-");
-};
-
-(function () {
   let css = `
         .widget-main {
 
@@ -538,7 +538,17 @@ const urlFormater = (text) => {
             display: flex;
             flex-direction: column;
             gap: 18px;
+            max-height: 450px;
+            overflow-y: scroll;
         }
+
+        #widget-notifications-list {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+      }
+      #widget-notifications-list::-webkit-scrollbar {
+          display: none;  /* Safari and Chrome */
+      }
 
         .widget-notifications-block , .widget-notifications-block-new {
             width: 100%;
@@ -719,23 +729,22 @@ const urlFormater = (text) => {
   // const notificationsMessages = [
   //   {
   //     title: "Connect your LinkedIn account",
-  //     text: "You can connect your LinkedIn account by clicking â€œAccountâ€, then looking for the â€œLinkedInâ€ section, and clicking â€œConnectâ€.",
+  //     text: "You can connect your LinkedIn account by clicking Ã¢â‚¬Å“AccountÃ¢â‚¬Â, then looking for the Ã¢â‚¬Å“LinkedInÃ¢â‚¬Â section, and clicking Ã¢â‚¬Å“ConnectÃ¢â‚¬Â.",
   //   },
   //   {
   //     title: "Connect your company account",
-  //     text: "You can connect your LinkedIn account by clicking â€œAccountâ€, then looking for the â€œLinkedInâ€ section, and clicking â€œConnectâ€.",
+  //     text: "You can connect your LinkedIn account by clicking Ã¢â‚¬Å“AccountÃ¢â‚¬Â, then looking for the Ã¢â‚¬Å“LinkedInÃ¢â‚¬Â section, and clicking Ã¢â‚¬Å“ConnectÃ¢â‚¬Â.",
   //   },
   //   {
   //     title: "Connect a different profile",
-  //     text: "You can connect your LinkedIn account by clicking â€œAccountâ€, then looking for the â€œLinkedInâ€ section, and clicking â€œConnectâ€.",
+  //     text: "You can connect your LinkedIn account by clicking Ã¢â‚¬Å“AccountÃ¢â‚¬Â, then looking for the Ã¢â‚¬Å“LinkedInÃ¢â‚¬Â section, and clicking Ã¢â‚¬Å“ConnectÃ¢â‚¬Â.",
   //   },
   //   {
   //     title: "Auto-like posts with other profile",
-  //     text: "You can connect your LinkedIn account by clicking â€œAccountâ€, then looking for the â€œLinkedInâ€ section, and clicking â€œConnectâ€.",
+  //     text: "You can connect your LinkedIn account by clicking Ã¢â‚¬Å“AccountÃ¢â‚¬Â, then looking for the Ã¢â‚¬Å“LinkedInÃ¢â‚¬Â section, and clicking Ã¢â‚¬Å“ConnectÃ¢â‚¬Â.",
   //   },
   // ];
 
- 
   // const webSocket = new WebSocket('ws://20.117.113.206:8000/log/ws_create');
 
   let notificationOpenId = 0;
@@ -769,7 +778,6 @@ const urlFormater = (text) => {
   const analyticsUrl = `${baseUrl}/analytics/create/`;
   const sessionSupportUrl = `${baseUrl}/log/session_support_details/`;
 
-
   function redirectToCommunity(community_title, cId) {
     const viewFullCommunityLink = `https://${urlFormater(
       community_title
@@ -800,12 +808,10 @@ const urlFormater = (text) => {
       let ntf = document.getElementById(`widget-notifications-block-${index}`);
       console.log(ntf);
       ntf.onclick = function () {
-          // const ntfIndex = new NumberWatcher(-1, handleIndexNotificationChange);
-          const ntfIndex = new NumberWatcher(-1, handleNotiArrowClick);
-          ntfIndex.setValue(index);
-        };
-      
-      
+        // const ntfIndex = new NumberWatcher(-1, handleIndexNotificationChange);
+        const ntfIndex = new NumberWatcher(-1, handleNotiArrowClick);
+        ntfIndex.setValue(index);
+      };
     });
 
     if (newValue) {
@@ -893,7 +899,7 @@ const urlFormater = (text) => {
             const tabsBlock = document.getElementById("widget-tabs");
             tabsBlock.innerHTML = `
                             <div id="widget-answer-block">
-                                <span id="widget-answer-title">How to connect your companyâ€™s LinkedIn account to you triggify account.</span>
+                                <span id="widget-answer-title">How to connect your companyÃ¢â‚¬â„¢s LinkedIn account to you triggify account.</span>
                                 <span class="widget-answer-message">
                                     As a Lavender user, this community will be the starting point of every interaction or communication that you have with the brand. You go to the community to get support. As a Lavender user, this community will be the starting point of every interaction or communication that you have with the brand. You go to the community to get support. As a Lavender user, this community will be the starting point of every interaction or communication that you have with the brand. You go to the community to get support.
                                 </span>
@@ -1058,19 +1064,16 @@ const urlFormater = (text) => {
   }
 
   async function openFinalScreen(searchInput) {
-    let response = await fetch(
-      `${baseUrl}/log/support/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey
-        },
-        body: JSON.stringify({
-          support_query: searchInput,
-        }),
-      }
-    );
+    let response = await fetch(`${baseUrl}/log/support/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        support_query: searchInput,
+      }),
+    });
 
     let data = await response.json();
     let insideNoti = document.getElementById("widget-notifications-list");
@@ -1084,7 +1087,11 @@ const urlFormater = (text) => {
               .map(
                 (el, index) =>
                   `
-                <div style="width: 450px;" class="widget-notifications-block-new" id="widget-notifications-block-${index}">
+                <div style="width: 450px; ${
+                  notificationsMessages.length - 1 == index
+                    ? "margin-bottom: 80px;"
+                    : ""
+                }" class="widget-notifications-block-new" id="widget-notifications-block-${index}">
                 <div style="justify-content: left" class="widget-notifications-block-title" id="widget-notifications-block-new-title-${index}">
                 <span style="width: 32px; height: 32px; justify-content: center; border-radius: 50%; background: #F1F1F2; color: #000000;
                 font-size: 14px; font-weight: 500; display: flex; align-items: center; line-height: 1;">${
@@ -1099,7 +1106,7 @@ const urlFormater = (text) => {
 `;
     //include button in bottom
     htmlContent += `
-    <div style="width: 450px;" class="widget-notifications-block-new" id="widget-notifications-new-block-ask-community">
+    <div style="width: 450px; position: absolute; bottom: -5px;" class="widget-notifications-block-new" id="widget-notifications-new-block-ask-community">
     <div style="display: flex; justify-content: center;" class="widget-notifications-block-title" id="widget-notifications-block-new-title-ask-community">
       <button style="margin-top: 0px;display: flex; align-items: center; justify-content: center;
        border-radius: 6px; border: 1px solid #F1F1F2; background: white;
@@ -1140,37 +1147,37 @@ const urlFormater = (text) => {
     const sessionSupportConfidence = Array(numberOfMessages).fill(0);
 
     fetch(sessionSupportUrl, {
-      method: 'POST', // Specify the method
+      method: "POST", // Specify the method
       headers: {
-        'Content-Type': 'application/json', // Set the content type header
-        'accept': 'application/json', // Set the accept header
-        'x-api-key': apiKey
+        "Content-Type": "application/json", // Set the content type header
+        accept: "application/json", // Set the accept header
+        "x-api-key": apiKey,
       },
-      body: JSON.stringify(
-        {
-          "session_id": sessionID,
-          "session_support_details": notificationsMessages,
-          "session_support_components": nextComponents,
-          "session_support_confidence": sessionSupportConfidence
-
-        }
-        
-      ) // Convert the JavaScript object to a JSON string
+      body: JSON.stringify({
+        session_id: sessionID,
+        session_support_details: notificationsMessages,
+        session_support_components: nextComponents,
+        session_support_confidence: sessionSupportConfidence,
+      }), // Convert the JavaScript object to a JSON string
     })
-    .then(response => response.json()) // Parse the JSON response
-    .then(data => {
-      console.log('Success:', data);
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
+      .then((response) => response.json()) // Parse the JSON response
+      .then((data) => {
+        console.log("Success:", data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
     let htmlContent = `
 
             ${notificationsMessages
               .map(
                 (el, index) =>
                   `
-                <div style="width: 450px;" class="widget-notifications-block-new" id="widget-notifications-${index}">
+                <div style="width: 450px;${
+                  notificationsMessages.length - 1 == index
+                    ? "margin-bottom: 80px;"
+                    : ""
+                }" class="widget-notifications-block-new" id="widget-notifications-${index}">
                 <div style="justify-content: left" class="widget-notifications-block-title" id="widget-notifications-block-title-${index}">
                 <span style="width: 32px; height: 32px; justify-content: center; border-radius: 50%; background: #F1F1F2; color: #000000;
                 font-size: 14px; font-weight: 500; display: flex; align-items: center; line-height: 1;">${
@@ -1185,7 +1192,7 @@ const urlFormater = (text) => {
 `;
     //include button in bottom
     htmlContent += `
-    <div style="width: 450px;" class="widget-notifications-block-new" id="widget-notifications-new-block-ask-community">
+    <div style="width: 450px; position: absolute; bottom: -5px;" class="widget-notifications-block-new" id="widget-notifications-new-block-ask-community">
     <div  style="display: flex; justify-content: center;" class="widget-notifications-block-title" id="widget-notifications-block-new-title-ask-community">
       <button style="margin-top: 0px;display: flex; align-items: center; justify-content: center;
        border-radius: 6px; border: 1px solid #F1F1F2; background: white;
@@ -1721,7 +1728,6 @@ const urlFormater = (text) => {
     setTimeout(() => {
       let arr = [];
       if (Array.isArray(content.predicted_components)) {
-
         content.predicted_components.forEach((component) => {
           const componentName = Array.isArray(component)
             ? component[0]
@@ -1735,29 +1741,29 @@ const urlFormater = (text) => {
       }
       notificationsMessages = [...arr];
       console.log("notifictaion message:", notificationsMessages);
-      
+
       const data = {
         session_id: sessionID,
         help_event: "POP-UP",
-        help_content: "Pop Up triggered"
+        help_content: "Pop Up triggered",
       };
-      
+
       fetch(analyticsUrl, {
-        method: 'POST', // Specify the method
+        method: "POST", // Specify the method
         headers: {
-          'Content-Type': 'application/json', // Set the content type header
-          'accept': 'application/json', // Set the accept header
-          'x-api-key': apiKey
+          "Content-Type": "application/json", // Set the content type header
+          accept: "application/json", // Set the accept header
+          "x-api-key": apiKey,
         },
-        body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
+        body: JSON.stringify(data), // Convert the JavaScript object to a JSON string
       })
-      .then(response => response.json()) // Parse the JSON response
-      .then(data => {
-        console.log('Success:', data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+        .then((response) => response.json()) // Parse the JSON response
+        .then((data) => {
+          console.log("Success:", data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
       // isNotification.setValue(false);
       refreshNotificationsDisplay(sessionID);
       isNotification.setValue(false);
@@ -1774,6 +1780,7 @@ const urlFormater = (text) => {
       console.error("Notification container element not found");
       return;
     }
+    notificationsContainer.style.width = "480px";
     const fetchPromises = notificationsMessages.map(
       async (notification, index) => {
         let response = await fetch(
@@ -1784,7 +1791,7 @@ const urlFormater = (text) => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              "x-api-key": apiKey
+              "x-api-key": apiKey,
               // Add any additional headers if needed
             },
           }
@@ -1794,39 +1801,32 @@ const urlFormater = (text) => {
           console.log(json, "response");
           if (json.status_code === 200) {
             return json.data;
-          }
-          else {
+          } else {
             return null;
           }
-          
-          
         }
-        
-        
       }
     );
-
-    
 
     const monitorUrl = `${baseUrl}/log/session_monitor/`;
     const monitorData = {
       session_id: sessionID,
-      monitor: "N"
+      monitor: "N",
     };
     try {
       const monitorResponse = await fetch(monitorUrl, {
-          method: 'POST',
-          headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey
-          },
-          body: JSON.stringify(monitorData),
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify(monitorData),
       });
       // Handle the monitorResponse if needed
     } catch (error) {
-        console.error('Error in monitor API request:', error);
-    };
+      console.error("Error in monitor API request:", error);
+    }
     // const response = await Promise.all(fetchPromises).then(results => {
     //   const validResults = results.filter(result => result !== null); // Filter out null values
     //   console.log(validResults); // This will log only the data from successful responses
@@ -1837,11 +1837,11 @@ const urlFormater = (text) => {
     // Using async/await style
     try {
       const results = await Promise.all(fetchPromises);
-      const validResults = results.filter(result => result !== null);
+      const validResults = results.filter((result) => result !== null);
       console.log(validResults);
       apiResponse = validResults;
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
     console.log(apiResponse);
     // notificationsContainer.innerHTML = "";
@@ -1854,30 +1854,34 @@ const urlFormater = (text) => {
         const data = {
           session_id: sessionID,
           help_event: "END-GOAL",
-          help_content: notification?.initial_support_question
+          help_content: notification?.initial_support_question,
         };
-        
+
         fetch(analyticsUrl, {
-          method: 'POST', // Specify the method
+          method: "POST", // Specify the method
           headers: {
-            'Content-Type': 'application/json', // Set the content type header
-            'accept': 'application/json', // Set the accept header
-            'x-api-key': apiKey
+            "Content-Type": "application/json", // Set the content type header
+            accept: "application/json", // Set the accept header
+            "x-api-key": apiKey,
           },
-          body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
+          body: JSON.stringify(data), // Convert the JavaScript object to a JSON string
         })
-        .then(response => response.json()) // Parse the JSON response
-        .then(data => {
-          console.log('Success:', data);
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+          .then((response) => response.json()) // Parse the JSON response
+          .then((data) => {
+            console.log("Success:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
 
         notificationHtml += `
-        <div  style="width: 450px;" class="widget-notifications-block hover-suggestion-fill" id="widget-notifications-block-${index}">
+        <div  style="width: 450px; ${
+          apiResponse?.length - 1 == index ? "margin-bottom: 80px;" : ""
+        }" class="widget-notifications-block hover-suggestion-fill" id="widget-notifications-block-${index}">
         <div style="justify-content: left;" class="widget-notifications-block-title" id="widget-notifications-block-title-${index}">
-            <span style="width: 95%; word-break: break-word;">${notification?.initial_support_question}</span>
+            <span style="width: 95%; word-break: break-word;">${
+              notification?.initial_support_question
+            }</span>
             <svg id="widget-notifications-block-title-arrow-${index}" width="5" height="8" viewBox="0 0 5 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M0 0.94L2.5003 4L0 7.06L0.769744 8L4.04525 4L0.769744 0L0 0.94Z" fill="#504DE5"/>
             </svg>
@@ -1888,7 +1892,7 @@ const urlFormater = (text) => {
       });
 
       notificationHtml += `
-      <div style="width: 450px; padding: ;" class="widget-notifications-block-new" id="custom-search-block">
+      <div style="width: 450px; position: absolute; bottom: -5px;" class="widget-notifications-block-new" id="custom-search-block">
         <div style="display: flex; justify-content: center;" class="widget-notifications-block-title" id="widget-notifications-block-title-search">
           <div class='search-input-div-input' style="width: 100%; height: 40px; margin-top: 0px; display: flex; align-items: center; border-radius: 6px; border: 1px solid #F1F1F2; background: #FAFAFA;">
             <input type="text" placeholder="Enter what you're trying to achieve..." style="flex: 1; padding: 8px; border: none; outline: none; border-radius: 6px 0 0 6px; font-size: 14px;
@@ -1916,25 +1920,25 @@ const urlFormater = (text) => {
             const data = {
               session_id: sessionID,
               help_event: "DETAIL-GOAL",
-              help_content: notification?.initial_support_question
+              help_content: notification?.initial_support_question,
             };
-            
+
             fetch(analyticsUrl, {
-              method: 'POST', // Specify the method
+              method: "POST", // Specify the method
               headers: {
-                'Content-Type': 'application/json', // Set the content type header
-                'accept': 'application/json', // Set the accept header
-                'x-api-key': apiKey
+                "Content-Type": "application/json", // Set the content type header
+                accept: "application/json", // Set the accept header
+                "x-api-key": apiKey,
               },
-              body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
+              body: JSON.stringify(data), // Convert the JavaScript object to a JSON string
             })
-            .then(response => response.json()) // Parse the JSON response
-            .then(data => {
-              console.log('Success:', data);
-            })
-            .catch((error) => {
-              console.error('Error:', error);
-            });
+              .then((response) => response.json()) // Parse the JSON response
+              .then((data) => {
+                console.log("Success:", data);
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
           });
       });
       let finBut = document.getElementById("open-final-popup");
@@ -1945,29 +1949,29 @@ const urlFormater = (text) => {
         document.getElementById("open-final-popup").innerHTML = loader;
         const searchInput = document.getElementById("search-input");
         const searchQuery = searchInput.value;
-        
+
         const data = {
           session_id: sessionID,
           help_event: "MORE-HELP",
-          help_content: searchQuery
+          help_content: searchQuery,
         };
-        
+
         fetch(analyticsUrl, {
-          method: 'POST', // Specify the method
+          method: "POST", // Specify the method
           headers: {
-            'Content-Type': 'application/json', // Set the content type header
-            'accept': 'application/json', // Set the accept header
-            'x-api-key': apiKey
+            "Content-Type": "application/json", // Set the content type header
+            accept: "application/json", // Set the accept header
+            "x-api-key": apiKey,
           },
-          body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
+          body: JSON.stringify(data), // Convert the JavaScript object to a JSON string
         })
-        .then(response => response.json()) // Parse the JSON response
-        .then(data => {
-          console.log('Success:', data);
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+          .then((response) => response.json()) // Parse the JSON response
+          .then((data) => {
+            console.log("Success:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
 
         openFinalScreen(searchQuery);
       });
@@ -1977,10 +1981,10 @@ const urlFormater = (text) => {
 
   // function updateWidgetColor(completedStep) {
   //   const notificationBlocks = document.querySelectorAll('.widget-notifications-block-new');
-    
+
   //   notificationBlocks.forEach((block, index) => {
   //     const circleSpan = block.querySelector('.widget-notifications-block-title span:first-child');
-      
+
   //     if (circleSpan) {
   //       if (index < completedStep) {
   //         circleSpan.style.border = '2px solid #49B517';
@@ -1991,28 +1995,32 @@ const urlFormater = (text) => {
   //   });
   // }
   function updateWidgetColor(completedStep) {
-    const notificationBlocks = document.querySelectorAll('.widget-notifications-block-new');
-  
+    const notificationBlocks = document.querySelectorAll(
+      ".widget-notifications-block-new"
+    );
+
     notificationBlocks.forEach((block, index) => {
-      const circleSpan = block.querySelector('.widget-notifications-block-title span:first-child');
-  
+      const circleSpan = block.querySelector(
+        ".widget-notifications-block-title span:first-child"
+      );
+
       if (circleSpan && completedStep) {
         if (index < completedStep) {
           // circleSpan.style.backgroundColor = '#E8FFE0';
           // circleSpan.style.border = 'none';
           // circleSpan.innerHTML = '&#10004;'; // Add tick mark
           // circleSpan.style.color = '#49B517'; // Set tick mark color
-          circleSpan.style.backgroundColor = '#d0f3b5'; // Light green background
+          circleSpan.style.backgroundColor = "#d0f3b5"; // Light green background
           const tickSVG = `
             <svg width="14" height="10" viewBox="0 0 14 10" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 5L5 9L13 1" stroke="#46BD05" stroke-width="2" fill="none"/>
             </svg>`;
           circleSpan.innerHTML = tickSVG; // Insert the SVG for the tick mark
-          circleSpan.style.textAlign = 'center'; // Center alignment
+          circleSpan.style.textAlign = "center"; // Center alignment
         } else {
-          console.log(index,completedStep);
-          circleSpan.style.backgroundColor = '#F1F1F2';
-          circleSpan.style.border = 'none';
+          console.log(index, completedStep);
+          circleSpan.style.backgroundColor = "#F1F1F2";
+          circleSpan.style.border = "none";
           // circleSpan.innerHTML = ''; // Remove index number
         }
       }
@@ -2021,25 +2029,25 @@ const urlFormater = (text) => {
 
   // function updateWidgetColor(completedStep) {
   //   const notificationBlocks = document.querySelectorAll('.widget-notifications-block-new');
-    
+
   //   notificationBlocks.forEach((block, index) => {
   //     const circleSpan = block.querySelector('.widget-notifications-block-title span:first-child');
-      
+
   //     if (circleSpan) {
   //       if (index < completedStep) {
   //         circleSpan.style.border = '2px solid #49B517';
-          
+
   //         // Add the green tick icon
   //         const tickIcon = document.createElement('span');
   //         tickIcon.innerHTML = '&#10004;'; // Unicode character for a tick mark
   //         tickIcon.style.color = '#49B517';
   //         tickIcon.style.fontSize = '12px';
   //         tickIcon.style.marginLeft = '4px';
-          
+
   //         circleSpan.appendChild(tickIcon);
   //       } else {
   //         circleSpan.style.border = 'none';
-          
+
   //         // Remove the tick icon if it exists
   //         const tickIcon = circleSpan.querySelector('span');
   //         if (tickIcon) {
@@ -2052,15 +2060,15 @@ const urlFormater = (text) => {
 
   // function updateWidgetColor(completedStep) {
   //   const notificationBlocks = document.querySelectorAll('.widget-notifications-block-new');
-    
+
   //   notificationBlocks.forEach((block, index) => {
   //     const circleSpan = block.querySelector('.widget-notifications-block-title span:first-child');
-      
+
   //     if (circleSpan) {
   //       if (index < completedStep) {
   //         circleSpan.style.backgroundColor = '#E8FFE0';
   //         circleSpan.style.color = 'transparent';
-          
+
   //         // Add the green tick icon
   //         const tickIcon = document.createElement('span');
   //         tickIcon.innerHTML = '&#10004;'; // Unicode character for a tick mark
@@ -2070,18 +2078,18 @@ const urlFormater = (text) => {
   //         tickIcon.style.top = '50%';
   //         tickIcon.style.left = '50%';
   //         tickIcon.style.transform = 'translate(-50%, -50%)';
-          
+
   //         // Remove existing tick icon if present
   //         const existingTickIcon = circleSpan.querySelector('span');
   //         if (existingTickIcon) {
   //           circleSpan.removeChild(existingTickIcon);
   //         }
-          
+
   //         circleSpan.appendChild(tickIcon);
   //       } else {
   //         circleSpan.style.backgroundColor = '#F1F1F2';
   //         circleSpan.style.color = '#000000';
-          
+
   //         // Remove the tick icon if it exists
   //         const tickIcon = circleSpan.querySelector('span');
   //         if (tickIcon) {
@@ -2123,7 +2131,7 @@ const urlFormater = (text) => {
     // Parse the supportMessage to get the completed step
     const parsedMessage = JSON.parse(supportMessage);
     completedStep = parsedMessage.response;
-    
+
     // Call the updateWidgetColor function with the completed step
     updateWidgetColor(completedStep);
     handleWebSocketMessage(supportMessage, sessionID);
@@ -2164,75 +2172,69 @@ const urlFormater = (text) => {
     let notificationList = document.getElementById("widget-notifications-list");
 
     mainWidgetButton.onclick = async function () {
-      if(notificationList.style.display === 'flex'){
+      if (notificationList.style.display === "flex") {
         notificationList.style.display = "none";
         widgetCircle.innerHTML = "?";
 
         const monitorUrl = `${baseUrl}/log/session_monitor/`;
         const monitorData = {
           session_id: sessionID,
-          monitor: "Y"
+          monitor: "Y",
         };
         try {
           const monitorResponse = await fetch(monitorUrl, {
-              method: 'POST',
-              headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json',
-                  'x-api-key': apiKey
-              },
-              body: JSON.stringify(monitorData),
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              "x-api-key": apiKey,
+            },
+            body: JSON.stringify(monitorData),
           });
           // Handle the monitorResponse if needed
         } catch (error) {
-            console.error('Error in monitor API request:', error);
-        };
-
+          console.error("Error in monitor API request:", error);
+        }
 
         const data = {
           session_id: sessionID,
           help_event: "CLOSE-POPUP",
-          help_content: "Pop up Closed"
+          help_content: "Pop up Closed",
         };
-        
+
         fetch(analyticsUrl, {
-          method: 'POST', // Specify the method
+          method: "POST", // Specify the method
           headers: {
-            'Content-Type': 'application/json', // Set the content type header
-            'accept': 'application/json', // Set the accept header
-            'x-api-key': apiKey
+            "Content-Type": "application/json", // Set the content type header
+            accept: "application/json", // Set the accept header
+            "x-api-key": apiKey,
           },
-          body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
+          body: JSON.stringify(data), // Convert the JavaScript object to a JSON string
         })
-        .then(response => response.json()) // Parse the JSON response
-        .then(data => {
-          console.log('Success:', data);
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-
-        
-
-
-      }else{
+          .then((response) => response.json()) // Parse the JSON response
+          .then((data) => {
+            console.log("Success:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      } else {
         mainLayout.style.display = isNotification.getValue()
-        ? "none"
-        : mainLayout.style.display === "flex"
-        ? "none"
-        : "flex";
-      notificationList.style.display = "none";
-      widgetCircle.innerHTML =
-        mainLayout.style.display === "flex"
-          ? `
+          ? "none"
+          : mainLayout.style.display === "flex"
+          ? "none"
+          : "flex";
+        notificationList.style.display = "none";
+        widgetCircle.innerHTML =
+          mainLayout.style.display === "flex"
+            ? `
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd" d="M11.7725 1.32466C11.8446 1.25269 11.9018 1.16724 11.9408 1.07318C11.9798 0.979113 11.9999 0.878283 12 0.776444C12.0001 0.674605 11.9801 0.573751 11.9412 0.47964C11.9022 0.38553 11.8452 0.300005 11.7732 0.22795C11.7012 0.155894 11.6158 0.0987197 11.5217 0.0596898C11.4277 0.0206599 11.3268 0.00053926 11.225 0.000476667C11.1232 0.000414074 11.0223 0.0204108 10.9282 0.059325C10.8341 0.0982392 10.7486 0.155309 10.6765 0.227275L5.9999 4.90396L1.32464 0.227275C1.17912 0.0817534 0.981751 -1.53333e-09 0.775955 0C0.570159 1.53332e-09 0.372791 0.0817534 0.227272 0.227275C0.081752 0.372798 1.5333e-09 0.570168 0 0.775967C-1.5333e-09 0.981767 0.081752 1.17914 0.227272 1.32466L4.90388 6L0.227272 10.6753C0.155218 10.7474 0.0980613 10.8329 0.0590659 10.9271C0.0200705 11.0212 0 11.1221 0 11.224C0 11.3259 0.0200705 11.4268 0.0590659 11.521C0.0980613 11.6151 0.155218 11.7007 0.227272 11.7727C0.372791 11.9182 0.570159 12 0.775955 12C0.877855 12 0.978757 11.9799 1.0729 11.9409C1.16704 11.9019 1.25258 11.8448 1.32464 11.7727L5.9999 7.09603L10.6765 11.7727C10.822 11.9181 11.0193 11.9996 11.225 11.9995C11.4307 11.9994 11.6279 11.9176 11.7732 11.772C11.9185 11.6265 12.0001 11.4292 12 11.2236C11.9999 11.0179 11.918 10.8207 11.7725 10.6753L7.09592 6L11.7725 1.32466Z" fill="black"/>
                 </svg>
             `
-          : "?";
-      isNotification.setValue(false);
+            : "?";
+        isNotification.setValue(false);
       }
-     
     };
 
     searchBlock.innerHTML = `
